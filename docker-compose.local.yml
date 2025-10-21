@@ -1,0 +1,25 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: ./compose/local/django/Dockerfile
+    image: crud_backend_web
+    command: /start
+    volumes:
+      - .:/app
+      - ./media:/app/media
+    ports:
+      - 8011:8010
+    env_file:
+      - ./env/.local
+    depends_on:
+      - db
+
+  db:
+    image: postgres:14
+    volumes:
+      - crud_data:/var/lib/postgresql/data/
+    env_file:
+      - ./env/.local
+volumes:
+  crud_data:

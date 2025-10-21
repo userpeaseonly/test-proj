@@ -1,0 +1,187 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block title %}User Analytics{% endblock %}
+
+{% block extrahead %}
+<style>
+    /* Force light theme - override any dark theme CSS variables */
+    :root {
+        --primary: #79aec8 !important;
+        --secondary: #417690 !important;
+        --accent: #f5dd5d !important;
+        --primary-fg: #fff !important;
+        --body-fg: #333 !important;
+        --body-bg: #fff !important;
+        --body-quiet-color: #666 !important;
+        --body-loud-color: #000 !important;
+    }
+
+    /* Override dark theme media query */
+    @media (prefers-color-scheme: dark) {
+        :root {
+            --body-fg: #333 !important;
+            --body-bg: #fff !important;
+        }
+        body {
+            background-color: #fff !important;
+            color: #333 !important;
+        }
+    }
+
+    /* Force light theme on body */
+    body {
+        background-color: #fff !important;
+        color: #333 !important;
+    }
+
+    .analytics-dashboard {
+        margin: 20px 0;
+    }
+    
+    .nav-links {
+        margin: 20px 0;
+        text-align: center;
+    }
+    
+    .nav-links a {
+        display: inline-block;
+        margin: 0 10px;
+        padding: 10px 20px;
+        background: #007cba;
+        color: white;
+        text-decoration: none;
+        border-radius: 5px;
+        transition: background-color 0.3s;
+    }
+    
+    .nav-links a:hover {
+        background: #005a87;
+    }
+    
+    .users-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+    
+    .users-table th,
+    .users-table td {
+        padding: 12px;
+        text-align: left;
+        border: 1px solid #ddd;
+    }
+    
+    .users-table th {
+        background-color: #f8f9fa;
+        font-weight: bold;
+    }
+    
+    .users-table tr:nth-child(even) {
+        background-color: #f9f9f9;
+    }
+    
+    .progress-bar {
+        width: 100px;
+        height: 20px;
+        background-color: #e9ecef;
+        border-radius: 10px;
+        overflow: hidden;
+    }
+    
+    .progress-fill {
+        height: 100%;
+        background-color: #007cba;
+        transition: width 0.3s ease;
+    }
+    
+    .completion-rate {
+        color: #28a745;
+        font-weight: bold;
+    }
+    
+    .user-email {
+        font-weight: bold;
+        color: #007cba;
+    }
+    
+    .no-data {
+        text-align: center;
+        padding: 40px;
+        color: #666;
+        font-style: italic;
+    }
+</style>
+
+<script>
+    // Force light theme by removing any dark theme classes
+    document.addEventListener('DOMContentLoaded', function() {
+        document.documentElement.classList.remove('theme-dark', 'dark-theme');
+        document.body.classList.remove('theme-dark', 'dark-theme');
+        document.documentElement.setAttribute('data-theme', 'light');
+        document.body.setAttribute('data-theme', 'light');
+        
+        // Override localStorage theme setting
+        if (typeof(Storage) !== "undefined") {
+            localStorage.setItem('django.admin.theme', 'light');
+        }
+    });
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="analytics-dashboard">
+    <h1>User Analytics</h1>
+    
+    <div class="nav-links">
+        <a href="{% url 'analytics_admin:analytics_dashboard' %}">Dashboard</a>
+        <a href="{% url 'analytics_admin:analytics_users' %}">User Analytics</a>
+        <a href="{% url 'analytics_admin:analytics_tasks' %}">Task Analytics</a>
+    </div>
+    
+    {% if users_with_stats %}
+        <table class="users-table">
+            <thead>
+                <tr>
+                    <th>User</th>
+                    <th>Total Tasks</th>
+                    <th>Completed</th>
+                    <th>Pending</th>
+                    <th>Completion Rate</th>
+                    <th>Progress</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users_with_stats %}
+                    <tr>
+                        <td>
+                            <div class="user-email">{{ user.email }}</div>
+                            {% if user.first_name %}
+                                <small>{{ user.first_name }} {{ user.last_name }}</small>
+                            {% endif %}
+                        </td>
+                        <td>{{ user.task_count }}</td>
+                        <td>{{ user.completed_count }}</td>
+                        <td>{{ user.pending_count }}</td>
+                        <td class="completion-rate">{{ user.completion_rate }}%</td>
+                        <td>
+                            {% if user.task_count > 0 %}
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: {{ user.completion_rate }}%"></div>
+                                </div>
+                            {% else %}
+                                <span>No tasks</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <div class="no-data">
+            <h3>No user data available</h3>
+            <p>Users will appear here once they start creating tasks.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,16 @@
+#!/bin/bash
+
+set -o errexit
+set -o pipefail
+set -o nounset
+
+# Run database migrations
+python manage.py migrate --settings=application.settings.production
+
+python manage.py createsuperuserifnone --settings=application.settings.local
+
+# Collect static files
+python manage.py collectstatic --noinput --settings=application.settings.production
+
+# Start Gunicorn with the production settings
+gunicorn --workers 3 --bind 0.0.0.0:8000 application.wsgi:application --env DJANGO_SETTINGS_MODULE=application.settings.production

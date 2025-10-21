@@ -1,0 +1,115 @@
+{% extends "admin/index.html" %}
+{% load i18n static %}
+
+{% block extrahead %}
+{{ block.super }}
+<style>
+    .analytics-widget {
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        padding: 20px;
+        margin: 20px 0;
+        text-align: center;
+    }
+    
+    .analytics-widget h3 {
+        color: #007cba;
+        margin-bottom: 15px;
+    }
+    
+    .analytics-link {
+        display: inline-block;
+        padding: 12px 24px;
+        background: #007cba;
+        color: white;
+        text-decoration: none;
+        border-radius: 5px;
+        font-weight: bold;
+        transition: background-color 0.3s;
+    }
+    
+    .analytics-link:hover {
+        background: #005a87;
+        color: white;
+    }
+    
+    .analytics-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 15px;
+        margin: 15px 0;
+    }
+    
+    .stat-item {
+        text-align: center;
+    }
+    
+    .stat-number {
+        font-size: 1.8em;
+        font-weight: bold;
+        color: #007cba;
+    }
+    
+    .stat-label {
+        font-size: 0.9em;
+        color: #666;
+        margin-top: 5px;
+    }
+</style>
+
+<script>
+// Auto-refresh analytics summary
+function loadAnalyticsSummary() {
+    fetch('/analytics/api/summary/')
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('total-tasks').textContent = data.overview.total_tasks || 0;
+            document.getElementById('completed-tasks').textContent = data.overview.completed_tasks || 0;
+            document.getElementById('pending-tasks').textContent = data.overview.pending_tasks || 0;
+            document.getElementById('total-users').textContent = data.overview.total_users || 0;
+        })
+        .catch(error => {
+            console.log('Analytics data not available:', error);
+        });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    loadAnalyticsSummary();
+    // Refresh every 5 minutes
+    setInterval(loadAnalyticsSummary, 300000);
+});
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="analytics-widget">
+    <h3>📊 Analytics Dashboard</h3>
+    <p>Monitor task and user statistics in real-time</p>
+    
+    <div class="analytics-stats">
+        <div class="stat-item">
+            <div class="stat-number" id="total-tasks">-</div>
+            <div class="stat-label">Total Tasks</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number" id="completed-tasks">-</div>
+            <div class="stat-label">Completed</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number" id="pending-tasks">-</div>
+            <div class="stat-label">Pending</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number" id="total-users">-</div>
+            <div class="stat-label">Total Users</div>
+        </div>
+    </div>
+    
+    <a href="/analytics-admin/" class="analytics-link">
+        🚀 Open Analytics Dashboard
+    </a>
+</div>
+
+{{ block.super }}
+{% endblock %}

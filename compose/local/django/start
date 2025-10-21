@@ -1,0 +1,10 @@
+#!/bin/bash
+
+set -o errexit
+set -o pipefail
+set -o nounset
+python manage.py migrate --settings=application.settings.local
+
+python manage.py createsuperuserifnone --settings=application.settings.local
+
+python manage.py runserver 0.0.0.0:8010 --settings=application.settings.local

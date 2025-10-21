@@ -1,0 +1,99 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block title %}{% trans 'Site administration' %}{% endblock %}
+
+{% block branding %}
+<h1 id="site-name"><a href="{% url 'admin:index' %}">Administration Panel</a></h1>
+{% endblock %}
+
+{% block nav-global %}{% endblock %}
+
+{% block content %}
+<div style="text-align: center; padding: 50px;">
+    <h1>Administration Panel</h1>
+    <p style="margin: 20px 0; color: #666;">
+        Welcome to the administration panel. This is a clean, minimal interface for system administrators.
+    </p>
+    
+    <div style="margin: 30px 0;">
+        <a href="/analytics-admin/" style="
+            display: inline-block;
+            padding: 15px 30px;
+            background: #007cba;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 16px;
+            margin: 10px;
+        ">Analytics Dashboard</a>
+    </div>
+    
+    <div style="margin-top: 40px; color: #999; font-size: 14px;">
+        <p>For detailed analytics and monitoring, please use the Analytics Dashboard above.</p>
+        <p>This admin interface has been simplified to prevent unauthorized access to sensitive data.</p>
+    </div>
+</div>
+
+<style>
+    /* Force light theme - override any dark theme CSS variables */
+    :root {
+        --primary: #79aec8 !important;
+        --secondary: #417690 !important;
+        --accent: #f5dd5d !important;
+        --primary-fg: #fff !important;
+        --body-fg: #333 !important;
+        --body-bg: #fff !important;
+        --body-quiet-color: #666 !important;
+        --body-loud-color: #000 !important;
+    }
+
+    /* Override dark theme media query */
+    @media (prefers-color-scheme: dark) {
+        :root {
+            --body-fg: #333 !important;
+            --body-bg: #fff !important;
+        }
+        body {
+            background-color: #fff !important;
+            color: #333 !important;
+        }
+    }
+
+    /* Force light theme on body */
+    body {
+        background-color: #fff !important;
+        color: #333 !important;
+    }
+
+    /* Hide the default admin content */
+    .dashboard #content-main {
+        display: none;
+    }
+    
+    /* Clean up the sidebar */
+    #content-related {
+        display: none;
+    }
+    
+    /* Make sure our content is visible */
+    .dashboard #content {
+        margin-left: 0 !important;
+    }
+</style>
+
+<script>
+    // Force light theme by removing any dark theme classes
+    document.addEventListener('DOMContentLoaded', function() {
+        document.documentElement.classList.remove('theme-dark', 'dark-theme');
+        document.body.classList.remove('theme-dark', 'dark-theme');
+        document.documentElement.setAttribute('data-theme', 'light');
+        document.body.setAttribute('data-theme', 'light');
+        
+        // Override localStorage theme setting
+        if (typeof(Storage) !== "undefined") {
+            localStorage.setItem('django.admin.theme', 'light');
+        }
+    });
+</script>
+{% endblock %}
