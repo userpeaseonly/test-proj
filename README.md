@@ -46,7 +46,7 @@ Make sure to configure the following variables in your environment files:
 ```bash
 # Django Settings
 DJANGO_SECRET_KEY=your-secret-key-for-development
-DJANGO_ENV=development
+DJANGO_ENV=local
 
 # Database Configuration
 POSTGRES_ENGINE=django.db.backends.postgresql
@@ -61,7 +61,7 @@ CORS_ALLOWED_ORIGINS=http://0.0.0.0:8011,http://localhost:3001,http://localhost:
 CSRF_TRUSTED_ORIGINS=http://0.0.0.0:8011,http://localhost:3001,http://localhost:3000,http://localhost:8011
 
 # Other Settings
-DEBUG=True
+DEBUG=1
 ALLOWED_HOSTS=localhost,127.0.0.1,0.0.0.0
 ```
 
@@ -84,7 +84,7 @@ CORS_ALLOWED_ORIGINS=https://test-proj-backend.trust-building.uz,https://test-pr
 CSRF_TRUSTED_ORIGINS=https://test-proj-backend.trust-building.uz,https://test-proj-client.trust-building.uz
 
 # Other Settings
-DEBUG=False
+DEBUG=0
 ALLOWED_HOSTS=test-proj-backend.trust-building.uz,your-domain.com
 ```
 
