@@ -1,133 +1,173 @@
-# Task Management System
 
-A comprehensive task management system built with Django REST Framework, featuring user authentication, role-based access control, and admin analytics dashboard.
+## 🔧 Local Development Setup
 
-## Features
+### Option 1: Docker Development (Recommended)
 
-### 🔐 User Authentication
-- **Registration & Login**: Users can register and login with email/password
-- **JWT Authentication**: Secure token-based authentication
-- **Role-based Access**: User and Admin roles with different permissions
-- **Password Security**: Automatically hashed and stored securely
-
-### ⚙️ Task Management
-- **CRUD Operations**: Create, Read, Update, Delete tasks
-- **User Isolation**: Regular users can only access their own tasks
-- **Admin Access**: Admins have unrestricted access to all tasks
-- **Task Status**: Track completion status with timestamps
-
-### 📊 Admin Analytics Dashboard
-- **PostgreSQL Aggregation**: Advanced database queries for analytics
-- **User Statistics**: Total tasks per user, completion rates
-- **Top Active Users**: Identify most productive users
-- **Comprehensive Metrics**: Overall system statistics
-
-## API Endpoints
-
-### Authentication
-- `POST /api/auth/register/` - User registration
-- `POST /api/auth/login/` - User login (get JWT tokens)
-- `POST /api/auth/token/refresh/` - Refresh JWT token
-- `GET /api/auth/profile/` - Get current user profile
-
-### Tasks
-- `GET /api/tasks/` - List tasks (filtered by user role)
-- `POST /api/tasks/` - Create new task
-- `GET /api/tasks/{id}/` - Get specific task
-- `PUT /api/tasks/{id}/` - Update task
-- `PATCH /api/tasks/{id}/` - Partially update task
-- `DELETE /api/tasks/{id}/` - Delete task
-
-### Admin Analytics
-- `GET /api/tasks/analytics/` - Admin-only analytics dashboard
-
-## Database Models
-
-### User Model
-```python
-- id (Primary Key)
-- email (unique)
-- password (hashed)
-- role (choices: 'user', 'admin')
-- first_name
-- last_name
-- date_joined
-```
-
-### Task Model
-```python
-- id (Primary Key)
-- title
-- description
-- completed (boolean)
-- created_at
-- updated_at
-- user (ForeignKey to User)
-```
-
-## Setup Instructions
-
-### 1. Install Dependencies
 ```bash
+# Clone and navigate
+git clone <repository-url>
+cd crud-proj
+
+# Start development environment
+docker compose -f docker-compose.local.yml up -d
+
+# View logs
+docker compose -f docker-compose.local.yml logs -f web
+
+# Stop services
+docker compose -f docker-compose.local.yml down
+```
+
+### Option 2: Native Python Development
+
+```bash
+# Create virtual environment
+python -m venv venv
+source venv/bin/activate  # Linux/Mac
+# or
+venv\Scripts\activate     # Windows
+
+# Install dependencies
 pip install -r requirements.txt
-```
 
-### 2. Environment Configuration
-Create a `.env` file in the root directory:
-```env
-DJANGO_SECRET_KEY=your-secret-key-here
-POSTGRES_ENGINE=django.db.backends.postgresql
-POSTGRES_DB=taskmanagement
-POSTGRES_USER=your-db-user
-POSTGRES_PASSWORD=your-db-password
-POSTGRES_HOST=localhost
-POSTGRES_PORT=5432
-```
+# Set environment variables
+export DJANGO_SECRET_KEY='your-secret-key'
+export POSTGRES_ENGINE='django.db.backends.sqlite3'
+export POSTGRES_DB='db.sqlite3'
 
-### 3. Database Setup
-```bash
-# Create and apply migrations
-python manage.py makemigrations
+# Run migrations
 python manage.py migrate
 
 # Create admin user
-python manage.py create_admin --email admin@example.com --password admin123
+python manage.py create_admin --email admin@test.com --password admin123
 
-# Create sample data (optional)
-python manage.py create_sample_data
+# Start development server
+python manage.py runserver 8011
 ```
 
-### 4. Run the Server
+### Development Commands
+
 ```bash
-python manage.py runserver
+# Create new migrations
+docker exec crud-proj-web-1 python manage.py makemigrations
+
+# Apply migrations
+docker exec crud-proj-web-1 python manage.py migrate
+
+# Create superuser
+docker exec crud-proj-web-1 python manage.py createsuperuser
+
+# Access Django shell
+docker exec -it crud-proj-web-1 python manage.py shell
+
+# Run tests
+docker exec crud-proj-web-1 python manage.py test
+
+# Collect static files
+docker exec crud-proj-web-1 python manage.py collectstatic --no-input
 ```
 
-## API Documentation
+## 🏭 Production Deployment
 
-### Interactive Documentation
-- **Swagger UI**: http://localhost:8000/swagger/
-- **ReDoc**: http://localhost:8000/redoc/
-- **OpenAPI Schema**: http://localhost:8000/api/schema/
+### Environment Configuration
+
+Create a `.env.production` file:
+
+```env
+# Django Settings
+DJANGO_SECRET_KEY=your-production-secret-key-here
+DEBUG=False
+ALLOWED_HOSTS=yourdomain.com,www.yourdomain.com
+
+# Database Configuration
+POSTGRES_ENGINE=django.db.backends.postgresql
+POSTGRES_DB=taskmanagement_prod
+POSTGRES_USER=taskman_user
+POSTGRES_PASSWORD=secure_password_here
+POSTGRES_HOST=db
+POSTGRES_PORT=5432
+
+# Security Settings
+CORS_ALLOWED_ORIGINS=https://yourdomain.com,https://www.yourdomain.com
+CSRF_TRUSTED_ORIGINS=https://yourdomain.com,https://www.yourdomain.com
+
+# SSL/HTTPS Settings (for production)
+SECURE_SSL_REDIRECT=True
+SECURE_PROXY_SSL_HEADER=HTTP_X_FORWARDED_PROTO,https
+SESSION_COOKIE_SECURE=True
+CSRF_COOKIE_SECURE=True
+```
+
+### Production Deployment with Docker
+
+```bash
+# Build production images
+docker compose -f docker-compose.prod.yml build
+
+# Start production services
+docker compose -f docker-compose.prod.yml up -d
+
+# Initialize database
+docker compose -f docker-compose.prod.yml exec web python manage.py migrate
+docker compose -f docker-compose.prod.yml exec web python manage.py create_admin --email admin@yourdomain.com --password <secure-password>
+docker compose -f docker-compose.prod.yml exec web python manage.py collectstatic --no-input
+
+# Check service status
+docker compose -f docker-compose.prod.yml ps
+```
+
+### Production with Nginx Reverse Proxy
+
+The production setup includes Nginx for:
+- Static file serving
+- SSL termination
+- Load balancing
+- Security headers
+
+```bash
+# Start full production stack
+docker compose -f docker-compose.prod.yml up -d
+
+# Nginx will be available on port 80/443
+# Django app accessible via Nginx proxy
+```
+
+### SSL Certificate Setup
+
+For production HTTPS, add SSL certificates:
+
+```bash
+# Create certificates directory
+mkdir -p compose/production/nginx/certs
+
+# Add your SSL certificates
+cp your-domain.crt compose/production/nginx/certs/
+cp your-domain.key compose/production/nginx/certs/
+
+# Update nginx.conf to use SSL
+# (See compose/production/nginx/nginx.conf)
+```
+
+## 🔌 API Usage
 
 ### Authentication Flow
 
 1. **Register a new user**:
 ```bash
-curl -X POST http://localhost:8000/api/auth/register/ \
+curl -X POST http://localhost:8011/api/auth/register/ \
   -H "Content-Type: application/json" \
   -d '{
     "email": "user@example.com",
     "password": "securepass123",
     "password_confirm": "securepass123",
     "first_name": "John",
-    "last_name": "Doe",
-    "role": "user"
+    "last_name": "Doe"
   }'
 ```
 
-2. **Login to get tokens**:
+2. **Login to get access token**:
 ```bash
-curl -X POST http://localhost:8000/api/auth/login/ \
+curl -X POST http://localhost:8011/api/auth/login/ \
   -H "Content-Type: application/json" \
   -d '{
     "email": "user@example.com",
@@ -137,180 +177,220 @@ curl -X POST http://localhost:8000/api/auth/login/ \
 
 3. **Use the access token**:
 ```bash
-curl -X GET http://localhost:8000/api/tasks/ \
+curl -X GET http://localhost:8011/api/tasks/ \
   -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
 ```
 
 ### Task Operations
 
-**Create a task**:
 ```bash
-curl -X POST http://localhost:8000/api/tasks/ \
+# Create a task
+curl -X POST http://localhost:8011/api/tasks/ \
   -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
     "title": "Complete project documentation",
-    "description": "Write comprehensive API documentation",
-    "completed": false
+    "description": "Write comprehensive API documentation"
   }'
-```
 
-**Update a task**:
-```bash
-curl -X PATCH http://localhost:8000/api/tasks/1/ \
+# List user tasks
+curl -X GET http://localhost:8011/api/tasks/ \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+
+# Update task status
+curl -X PATCH http://localhost:8011/api/tasks/1/ \
   -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
   -H "Content-Type: application/json" \
-  -d '{
-    "completed": true
-  }'
+  -d '{"completed": true}'
+
+# Get task statistics
+curl -X GET http://localhost:8011/api/tasks/stats/ \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
 ```
 
-### Admin Analytics
+## 🛡️ API Throttling
 
-**Get analytics dashboard** (admin only):
-```bash
-curl -X GET http://localhost:8000/api/tasks/analytics/ \
-  -H "Authorization: Bearer ADMIN_ACCESS_TOKEN"
+The API includes comprehensive rate limiting:
+
+### Default Rates
+- **Anonymous users**: 100 requests/hour
+- **Authenticated users**: 1000 requests/hour
+- **Admin users**: 5x higher limits
+
+### Endpoint-Specific Limits
+- **Login**: 10 attempts/hour per IP
+- **Registration**: 5 registrations/hour per IP
+- **Task creation**: 100 tasks/hour per user
+- **Task updates**: 200 updates/hour per user
+- **Burst protection**: 60 requests/minute
+
+### Throttle Response
+When throttled, the API returns HTTP 429:
+```json
+{
+    "detail": "Request was throttled. Expected available in 3600 seconds."
+}
 ```
 
-Response includes:
-- Total users with tasks
-- Overall completion statistics
-- Per-user analytics with completion rates
-- Top active users
+## 📊 Admin Analytics
 
-## Security Features
+Access comprehensive analytics at `/analytics-admin/`:
 
-- **JWT Token Authentication**: Secure, stateless authentication
-- **Role-based Permissions**: Different access levels for users and admins
-- **Object-level Permissions**: Users can only access their own tasks
-- **Password Validation**: Django's built-in password validation
-- **CORS Configuration**: Proper cross-origin resource sharing setup
+### Features
+- **User Analytics**: User productivity and task completion rates
+- **Task Analytics**: System-wide task statistics and recent activity
+- **Dashboard**: Overview with key metrics and charts
+- **Read-only Access**: Safe data viewing without modification rights
 
-## Technology Stack
+### Access Requirements
+- Admin role user account
+- Login at `/admin/` first, then navigate to `/analytics-admin/`
 
-- **Backend**: Django REST Framework
-- **Authentication**: JWT (djangorestframework-simplejwt)
-- **Database**: PostgreSQL (with SQLite fallback)
-- **API Documentation**: drf-spectacular (OpenAPI 3.0)
-- **Permissions**: Custom role-based permissions
-- **Admin Interface**: Django Admin with custom configurations
+## 🧪 Testing
 
-## Testing
-
-The system includes management commands for creating test data:
-
+### Running Tests
 ```bash
-# Create admin user
-python manage.py create_admin
+# Run all tests
+docker exec crud-proj-web-1 python manage.py test
 
+# Run specific app tests
+docker exec crud-proj-web-1 python manage.py test users
+docker exec crud-proj-web-1 python manage.py test tasks
+
+# Run with coverage
+docker exec crud-proj-web-1 coverage run --source='.' manage.py test
+docker exec crud-proj-web-1 coverage report
+```
+
+### Create Test Data
+```bash
 # Create sample users and tasks
-python manage.py create_sample_data
+docker exec crud-proj-web-1 python manage.py create_analytics_data --users 15 --tasks 75
+
+# Create admin user
+docker exec crud-proj-web-1 python manage.py create_admin --email admin@test.com --password admin123
 ```
 
-This will create:
-- 3 sample users with different task loads
-- Random tasks with varying completion statuses
-- Realistic data for testing analytics
-
-## Production Considerations
-
-- Configure PostgreSQL database
-- Set proper environment variables
-- Configure static file serving
-- Set up proper CORS origins
-- Use secure secret keys
-- Configure logging
-- Set up monitoring and backups
-
-
-
-## Getting started
-
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
-
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
-
-## Add your files
-
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/topics/git/add_files/#add-files-to-a-git-repository) or push an existing Git repository with the following command:
+## 📁 Project Structure
 
 ```
-cd existing_repo
-git remote add origin https://gitlab.com/xpert5675335/backend.git
-git branch -M main
-git push -uf origin main
+crud-proj/
+├── application/           # Main Django project
+│   ├── settings/         # Environment-specific settings
+│   ├── throttles.py      # Custom throttling classes
+│   └── urls.py          # Main URL configuration
+├── users/               # User authentication app
+│   ├── models.py        # User model with roles
+│   ├── views.py         # Auth views with throttling
+│   └── serializers.py   # User serializers
+├── tasks/               # Task management app
+│   ├── models.py        # Task model
+│   ├── views.py         # Task CRUD views
+│   └── serializers.py   # Task serializers
+├── analytics/           # Admin analytics app
+│   ├── admin.py         # Custom admin site
+│   ├── views.py         # Analytics views
+│   └── management/      # Management commands
+├── templates/           # Django templates
+│   └── admin/          # Admin interface templates
+├── compose/            # Docker configuration
+│   ├── local/          # Local development
+│   └── production/     # Production deployment
+├── docker-compose.local.yml   # Local development
+├── docker-compose.prod.yml    # Production deployment
+├── requirements.txt    # Python dependencies
+└── THROTTLING.md      # Detailed throttling documentation
 ```
 
-## Integrate with your tools
+## 🐛 Troubleshooting
 
-- [ ] [Set up project integrations](https://gitlab.com/xpert5675335/backend/-/settings/integrations)
+### Common Issues
 
-## Collaborate with your team
+**Database connection issues**:
+```bash
+# Check if PostgreSQL is running
+docker compose -f docker-compose.local.yml ps
 
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Set auto-merge](https://docs.gitlab.com/user/project/merge_requests/auto_merge/)
+# Restart services
+docker compose -f docker-compose.local.yml restart
+```
 
-## Test and Deploy
+**Migration issues**:
+```bash
+# Reset migrations (development only)
+docker exec crud-proj-web-1 python manage.py migrate --fake-initial
 
-Use the built-in continuous integration in GitLab.
+# Create new migration
+docker exec crud-proj-web-1 python manage.py makemigrations
+```
 
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing (SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
+**Permission issues**:
+```bash
+# Check user permissions
+docker exec -it crud-proj-web-1 python manage.py shell
+>>> from django.contrib.auth import get_user_model
+>>> User = get_user_model()
+>>> user = User.objects.get(email='your-email')
+>>> print(user.role, user.is_staff, user.is_superuser)
+```
 
-***
+**Container issues**:
+```bash
+# View container logs
+docker logs crud-proj-web-1
 
-# Editing this README
+# Access container shell
+docker exec -it crud-proj-web-1 /bin/bash
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thanks to [makeareadme.com](https://www.makeareadme.com/) for this template.
+# Rebuild containers
+docker compose -f docker-compose.local.yml build --no-cache
+```
 
-## Suggestions for a good README
+## 📚 Additional Documentation
 
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+- **API Throttling**: See `THROTTLING.md` for detailed rate limiting information
+- **OpenAPI Schema**: Available at `/api/schema/`
+- **Swagger UI**: Interactive docs at `/swagger/`
+- **ReDoc**: Alternative docs at `/redoc/`
 
-## Name
-Choose a self-explaining name for your project.
+## 🔒 Security Considerations
 
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
+### Production Security Checklist
+- [ ] Use strong `DJANGO_SECRET_KEY`
+- [ ] Set `DEBUG=False`
+- [ ] Configure proper `ALLOWED_HOSTS`
+- [ ] Use HTTPS with SSL certificates
+- [ ] Set secure cookie flags
+- [ ] Configure proper CORS origins
+- [ ] Use strong database passwords
+- [ ] Regular security updates
+- [ ] Monitor API throttling logs
+- [ ] Backup database regularly
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+### Environment Variables
+Store sensitive data in environment variables:
+- Database credentials
+- Secret keys
+- API keys
+- Domain configurations
 
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+## 🤝 Contributing
 
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests if applicable
+5. Update documentation
+6. Submit a pull request
 
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+## 📄 License
 
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+This project is licensed under the MIT License - see the LICENSE file for details.
 
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
+## 👥 Support
 
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
-
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
-
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
-
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
-
-## License
-For open source projects, say how it is licensed.
-
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+For support and questions:
+- Check the troubleshooting section
+- Review the API documentation
+- Submit issues on the project repository
+- Contact the development team
