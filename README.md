@@ -94,7 +94,6 @@ ALLOWED_HOSTS=test-proj-backend.trust-building.uz,your-domain.com
 - Task management with CRUD operations
 - Admin analytics dashboard
 - API rate limiting and throttling
-- Multi-language support (Uzbek, English, Russian)
 - Responsive admin interface with light theme
 
 ## API Documentation
