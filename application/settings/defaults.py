@@ -11,7 +11,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
-ALLOWED_HOSTS = ['*']
+# ALLOWED_HOSTS = ['*']
 # if DEBUG == 'False':
 #     from dotenv import dotenv_values
 #     config = dotenv_values("env/.local")
@@ -160,7 +160,7 @@ SIMPLE_JWT = {
     # Cookie settings for refresh token
     'AUTH_COOKIE': 'refresh_token',
     'AUTH_COOKIE_DOMAIN': None,
-    'AUTH_COOKIE_SECURE': False,  # Set to True in production with HTTPS
+    'AUTH_COOKIE_SECURE': True if os.environ.get("DJANGO_ENV") == "production" else False,  # Set to True in production with HTTPS
     'AUTH_COOKIE_HTTP_ONLY': True,  # Prevents JavaScript access
     'AUTH_COOKIE_PATH': '/',
     'AUTH_COOKIE_SAMESITE': 'Lax',
@@ -255,9 +255,6 @@ CSRF_TRUSTED_ORIGINS = os.environ.get('CSRF_ALLOWED_ORIGINS', 'http://0.0.0.0:80
 
 CORS_ALLOWED_ORIGINS = os.getenv('CORS_ALLOWED_ORIGINS', 'http://0.0.0.0:8020').split(',')
 CORS_TRUSTED_ORIGINS = os.getenv('CORS_ALLOWED_ORIGINS', 'http://0.0.0.0:8020').split(',')
-
-print("CORS_ALLOWED_ORIGINS:", CORS_ALLOWED_ORIGINS)
-print("CSRF_TRUSTED_ORIGINS:", CSRF_TRUSTED_ORIGINS)
 
 
 CORS_ALLOW_CREDENTIALS = True

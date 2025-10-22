@@ -4,6 +4,7 @@ from .defaults import *
 
 
 DEBUG = os.getenv('DEBUG')
+print("Production DEBUG:", DEBUG)
 
 ALLOWED_HOSTS = os.environ.get('DJANGO_ALLOWED_HOSTS').split(',')
 
