@@ -4,192 +4,61 @@
 {% block extrahead %}
 {{ block.super }}
 <style>
-    /* Force light theme by overriding CSS custom properties */
+    /* Simplified light theme enforcement - only override essential variables */
     :root {
-        --primary: #79aec8;
-        --secondary: #417690;
-        --accent: #f5dd5d;
-        --primary-fg: #fff;
-
-        --body-fg: #333;
-        --body-bg: #fff;
-        --body-quiet-color: #666;
-        --body-loud-color: #000;
-
-        --header-color: #ffc;
-        --header-branding-color: var(--accent);
-        --header-bg: var(--secondary);
-        --header-link-color: var(--primary-fg);
-
-        --breadcrumbs-fg: #c4dce8;
-        --breadcrumbs-link-fg: var(--body-bg);
-        --breadcrumbs-bg: var(--primary);
-
-        --link-fg: #447e9b;
-        --link-hover-color: #036;
-        --link-selected-fg: #5b80b2;
-
-        --hairline-color: #e8e8e8;
-        --border-color: #ccc;
-
-        --error-fg: #ba2121;
-
-        --message-success-bg: #dfd;
-        --message-warning-bg: #ffc;
-        --message-error-bg: #ffefef;
-
-        --darkened-bg: #f8f8f8;
-        --selected-bg: #e4e4e4;
-        --selected-row: #ffc;
-
-        --button-fg: #fff;
-        --button-bg: var(--primary);
-        --button-hover-bg: #609ab6;
-        --default-button-bg: var(--secondary);
-        --default-button-hover-bg: #205067;
-        --close-button-bg: #888;
-        --close-button-hover-bg: #747474;
-        --delete-button-bg: #ba2121;
-        --delete-button-hover-bg: #a41515;
-
-        --object-tools-fg: var(--button-fg);
-        --object-tools-bg: var(--close-button-bg);
-        --object-tools-hover-bg: var(--close-button-hover-bg);
+        --primary: #79aec8 !important;
+        --secondary: #417690 !important;
+        --body-fg: #333 !important;
+        --body-bg: #fff !important;
+        --link-fg: #447e9b !important;
+        --button-fg: #fff !important;
+        --button-bg: var(--primary) !important;
+        --header-bg: var(--secondary) !important;
+        --border-color: #ccc !important;
     }
 
-    /* Force remove any dark theme media queries */
+    /* Force light theme for dark mode preference */
     @media (prefers-color-scheme: dark) {
         :root {
-            --primary: #79aec8 !important;
-            --secondary: #417690 !important;
-            --accent: #f5dd5d !important;
-            --primary-fg: #fff !important;
-
             --body-fg: #333 !important;
             --body-bg: #fff !important;
-            --body-quiet-color: #666 !important;
-            --body-loud-color: #000 !important;
-
-            --header-color: #ffc !important;
-            --header-branding-color: var(--accent) !important;
-            --header-bg: var(--secondary) !important;
-            --header-link-color: var(--primary-fg) !important;
-
-            --breadcrumbs-fg: #c4dce8 !important;
-            --breadcrumbs-link-fg: var(--body-bg) !important;
-            --breadcrumbs-bg: var(--primary) !important;
-
-            --link-fg: #447e9b !important;
-            --link-hover-color: #036 !important;
-            --link-selected-fg: #5b80b2 !important;
-
-            --hairline-color: #e8e8e8 !important;
-            --border-color: #ccc !important;
-
-            --error-fg: #ba2121 !important;
-
-            --message-success-bg: #dfd !important;
-            --message-warning-bg: #ffc !important;
-            --message-error-bg: #ffefef !important;
-
-            --darkened-bg: #f8f8f8 !important;
-            --selected-bg: #e4e4e4 !important;
-            --selected-row: #ffc !important;
-
-            --button-fg: #fff !important;
-            --button-bg: var(--primary) !important;
-            --button-hover-bg: #609ab6 !important;
-            --default-button-bg: var(--secondary) !important;
-            --default-button-hover-bg: #205067 !important;
-            --close-button-bg: #888 !important;
-            --close-button-hover-bg: #747474 !important;
-            --delete-button-bg: #ba2121 !important;
-            --delete-button-hover-bg: #a41515 !important;
-
-            --object-tools-fg: var(--button-fg) !important;
-            --object-tools-bg: var(--close-button-bg) !important;
-            --object-tools-hover-bg: var(--close-button-hover-bg) !important;
         }
-
-        /* Force light background colors */
+        
         body {
             background-color: #fff !important;
             color: #333 !important;
         }
-
-        #header {
-            background: var(--secondary) !important;
-        }
-
-        #content {
-            background-color: #fff !important;
-        }
-
-        .module {
-            background: #fff !important;
-            border: 1px solid #ccc !important;
-        }
-
-        .dashboard .module table {
-            background: #fff !important;
-        }
-
-        .dashboard .module h2, .dashboard .module caption {
-            background: #f8f8f8 !important;
-            color: #333 !important;
-        }
     }
 
-    /* Additional override for any dark theme classes */
+    /* Remove dark theme classes */
     .theme-dark,
     [data-theme="dark"],
     .dark-theme {
-        --body-bg: #fff !important;
-        --body-fg: #333 !important;
         background-color: #fff !important;
         color: #333 !important;
     }
 
-    /* Force light theme for form elements */
+    /* Ensure forms work properly */
     input, textarea, select {
         background-color: #fff !important;
         color: #333 !important;
         border: 1px solid #ccc !important;
     }
-
-    /* Force light theme for tables */
-    table {
-        background-color: #fff !important;
-        color: #333 !important;
-    }
-
-    th {
-        background-color: #f8f8f8 !important;
-        color: #333 !important;
-    }
-
-    td {
-        background-color: #fff !important;
-        color: #333 !important;
-    }
-
-    /* Force light theme for module headers */
-    .module h2, .module caption {
-        background: #f8f8f8 !important;
-        color: #333 !important;
-    }
 </style>
 
 <script>
-    // Force light theme by removing any dark theme classes and preventing theme switching
-    document.addEventListener('DOMContentLoaded', function() {
-        // Remove any dark theme classes
-        document.documentElement.classList.remove('theme-dark', 'dark-theme');
-        document.body.classList.remove('theme-dark', 'dark-theme');
+    // Completely disable Django's theme system
+    (function() {
+        // Force light theme function
+        function forceLight() {
+            document.documentElement.classList.remove('theme-dark', 'dark-theme');
+            document.body.classList.remove('theme-dark', 'dark-theme');
+            document.documentElement.setAttribute('data-theme', 'light');
+            document.body.setAttribute('data-theme', 'light');
+        }
         
-        // Set data attributes to light
-        document.documentElement.setAttribute('data-theme', 'light');
-        document.body.setAttribute('data-theme', 'light');
+        // Run immediately
+        forceLight();
         
         // Override localStorage theme setting
         if (typeof(Storage) !== "undefined") {
@@ -197,31 +66,30 @@
             localStorage.removeItem('admin-theme');
         }
         
-        // Override any theme toggle functionality
-        const themeToggle = document.querySelector('.theme-toggle');
-        if (themeToggle) {
-            themeToggle.style.display = 'none';
-        }
+        // Disable Django's theme functions
+        window.toggleTheme = function() { return false; };
+        window.initTheme = function() { forceLight(); };
         
-        // Continuously enforce light theme
-        const enforceLight = function() {
-            document.documentElement.classList.remove('theme-dark', 'dark-theme');
-            document.body.classList.remove('theme-dark', 'dark-theme');
-            document.documentElement.setAttribute('data-theme', 'light');
-            document.body.setAttribute('data-theme', 'light');
+        // Run when DOM is ready
+        document.addEventListener('DOMContentLoaded', function() {
+            forceLight();
+            
+            // Hide theme toggle if it exists
+            const themeToggles = document.querySelectorAll('.theme-toggle, [data-theme-toggle], .toggle-theme');
+            themeToggles.forEach(function(toggle) {
+                toggle.style.display = 'none';
+            });
+        });
+        
+        // Override localStorage to prevent theme changes
+        const originalSetItem = localStorage.setItem;
+        localStorage.setItem = function(key, value) {
+            if (key.includes('theme')) {
+                return originalSetItem.call(this, key, 'light');
+            }
+            return originalSetItem.call(this, key, value);
         };
-        
-        // Watch for changes and enforce light theme
-        const observer = new MutationObserver(enforceLight);
-        observer.observe(document.documentElement, {
-            attributes: true,
-            attributeFilter: ['class', 'data-theme']
-        });
-        observer.observe(document.body, {
-            attributes: true,
-            attributeFilter: ['class', 'data-theme']
-        });
-    });
+    })();
 </script>
 {% endblock %}
 

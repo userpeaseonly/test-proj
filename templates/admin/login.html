@@ -1,0 +1,199 @@
+{% extends "admin/base.html" %}
+{% load i18n static %}
+
+{% block extrahead %}
+{{ block.super }}
+<style>
+    /* Override Django's theme system completely for login page */
+    :root {
+        --primary: #79aec8 !important;
+        --secondary: #417690 !important;
+        --body-fg: #333 !important;
+        --body-bg: #fff !important;
+        --link-fg: #447e9b !important;
+        --button-fg: #fff !important;
+        --button-bg: var(--primary) !important;
+    }
+
+    /* Force light theme regardless of preferences */
+    @media (prefers-color-scheme: dark) {
+        :root {
+            --body-fg: #333 !important;
+            --body-bg: #fff !important;
+        }
+    }
+
+    /* Ensure login form is visible and functional */
+    html, body {
+        background-color: #fff !important;
+        color: #333 !important;
+    }
+
+    .login {
+        background-color: #fff !important;
+    }
+
+    .login #header {
+        background: var(--secondary) !important;
+        color: #fff !important;
+    }
+
+    .login #content {
+        background-color: #fff !important;
+    }
+
+    .login .form-row {
+        background-color: #fff !important;
+    }
+
+    .login .form-row input {
+        background-color: #fff !important;
+        color: #333 !important;
+        border: 1px solid #ccc !important;
+    }
+
+    .login .form-row label {
+        color: #333 !important;
+    }
+
+    .login .submit-row {
+        background-color: #fff !important;
+    }
+
+    .login input[type="submit"] {
+        background-color: var(--button-bg) !important;
+        color: var(--button-fg) !important;
+        border: none !important;
+    }
+
+    /* Disable dark theme classes completely */
+    .theme-dark,
+    [data-theme="dark"],
+    .dark-theme {
+        background-color: #fff !important;
+        color: #333 !important;
+    }
+
+    /* Make sure form elements are always visible */
+    #login-form input {
+        background-color: #fff !important;
+        color: #333 !important;
+        border: 1px solid #ccc !important;
+    }
+
+    /* Override any potential JS theme interference */
+    body.theme-dark,
+    html.theme-dark {
+        background-color: #fff !important;
+        color: #333 !important;
+    }
+</style>
+
+<script>
+    // Completely disable Django's theme system for login page
+    (function() {
+        // Remove theme classes immediately
+        function forceLight() {
+            document.documentElement.classList.remove('theme-dark', 'dark-theme');
+            document.body.classList.remove('theme-dark', 'dark-theme');
+            document.documentElement.setAttribute('data-theme', 'light');
+            document.body.setAttribute('data-theme', 'light');
+        }
+        
+        // Run immediately
+        forceLight();
+        
+        // Override localStorage
+        if (typeof(Storage) !== "undefined") {
+            localStorage.setItem('django.admin.theme', 'light');
+            localStorage.removeItem('admin-theme');
+        }
+        
+        // Disable Django's theme.js completely
+        window.toggleTheme = function() { return false; };
+        window.initTheme = function() { forceLight(); };
+        
+        // Run when DOM is ready
+        document.addEventListener('DOMContentLoaded', function() {
+            forceLight();
+            
+            // Hide any theme toggles
+            const themeToggles = document.querySelectorAll('.theme-toggle, [data-theme-toggle], .toggle-theme');
+            themeToggles.forEach(function(toggle) {
+                toggle.style.display = 'none';
+            });
+        });
+        
+        // Prevent any theme changes
+        const originalSetItem = localStorage.setItem;
+        localStorage.setItem = function(key, value) {
+            if (key.includes('theme')) {
+                return originalSetItem.call(this, key, 'light');
+            }
+            return originalSetItem.call(this, key, value);
+        };
+    })();
+</script>
+{% endblock %}
+
+{% block title %}{{ title }} | {{ site_title|default:_('Django site admin') }}{% endblock %}
+
+{% block branding %}
+<h1 id="site-name"><a href="{% url 'admin:index' %}">{{ site_header|default:_('Django administration') }}</a></h1>
+{% endblock %}
+
+{% block nav-global %}{% endblock %}
+
+{% block content %}
+<div id="content-main">
+{% if form.errors and not form.non_field_errors %}
+    <p class="errornote">
+    {% if form.errors.items|length == 1 %}{% trans "Please correct the error below." %}{% else %}{% trans "Please correct the errors below." %}{% endif %}
+    </p>
+{% endif %}
+
+{% if form.non_field_errors %}
+    {% for error in form.non_field_errors %}
+        <p class="errornote">{{ error }}</p>
+    {% endfor %}
+{% endif %}
+
+<div id="content" class="colM">
+
+    {% if user.is_authenticated %}
+    <p class="errornote">
+    {% blocktrans trimmed %}
+        You are authenticated as {{ username }}, but are not authorized to
+        access this page. Would you like to login to a different account?
+    {% endblocktrans %}
+    </p>
+    {% endif %}
+
+    <form action="{{ app_path }}" method="post" id="login-form">{% csrf_token %}
+      <div class="form-row">
+        {{ form.username.errors }}
+        {{ form.username.label_tag }} {{ form.username }}
+      </div>
+      <div class="form-row">
+        {{ form.password.errors }}
+        {{ form.password.label_tag }} {{ form.password }}
+        <input type="hidden" name="next" value="{{ next }}">
+      </div>
+      {% url 'admin_password_reset' as password_reset_url %}
+      {% if password_reset_url %}
+      <div class="password-reset-link">
+        <a href="{{ password_reset_url }}">{% trans 'Forgotten your password or username?' %}</a>
+      </div>
+      {% endif %}
+      <div class="submit-row">
+        <input type="submit" value="{% trans 'Log in' %}">
+      </div>
+    </form>
+
+    <script>
+    document.getElementById('{{ form.username.id_for_label }}').focus();
+    </script>
+</div>
+
+</div>
+{% endblock %}
