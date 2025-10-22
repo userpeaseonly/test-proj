@@ -3,8 +3,8 @@ import os
 from .defaults import *
 
 
-DEBUG = os.getenv('DEBUG')
-print("Production DEBUG:", DEBUG)
+DEBUG = int(os.getenv('DEBUG'))
+print("Production DEBUG:", bool(DEBUG))
 
 ALLOWED_HOSTS = os.environ.get('DJANGO_ALLOWED_HOSTS').split(',')
 

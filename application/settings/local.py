@@ -2,7 +2,10 @@ from .defaults import *
 import os
 
 
-DEBUG = True
+DEBUG = int(os.getenv('DEBUG'))
+print("Type of DEBUG:", type(DEBUG))
+print("Production DEBUG:", bool(DEBUG))
+
 ALLOWED_HOSTS = ['*', 'localhost', '127.0.0']
 
 
