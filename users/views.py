@@ -1,5 +1,5 @@
 from rest_framework import generics, status
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import api_view, permission_classes, throttle_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
@@ -7,6 +7,10 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import get_user_model
 from django.conf import settings
 from drf_spectacular.utils import extend_schema
+from application.throttles import (
+    LoginRateThrottle, RegisterRateThrottle, BurstRateThrottle, 
+    MediumSecurityThrottle, HighSecurityThrottle
+)
 from .serializers import UserRegistrationSerializer, UserSerializer, CustomTokenObtainPairSerializer
 
 User = get_user_model()
@@ -16,6 +20,7 @@ class UserRegistrationView(generics.CreateAPIView):
     queryset = User.objects.all()
     serializer_class = UserRegistrationSerializer
     permission_classes = [AllowAny]
+    throttle_classes = [RegisterRateThrottle, BurstRateThrottle]
 
     @extend_schema(
         summary="Register a new user",
@@ -37,6 +42,7 @@ class UserRegistrationView(generics.CreateAPIView):
 class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
     permission_classes = [AllowAny]
+    throttle_classes = [LoginRateThrottle, BurstRateThrottle]
 
     @extend_schema(
         summary="Login user",
@@ -68,6 +74,7 @@ class CustomTokenObtainPairView(TokenObtainPairView):
 
 class CustomTokenRefreshView(TokenRefreshView):
     permission_classes = [AllowAny]
+    throttle_classes = [HighSecurityThrottle, BurstRateThrottle]
 
     @extend_schema(
         summary="Refresh access token",
@@ -114,6 +121,7 @@ class CustomTokenRefreshView(TokenRefreshView):
 )
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
+@throttle_classes([MediumSecurityThrottle])
 def user_profile(request):
     """Get current user profile (/me endpoint)"""
     serializer = UserSerializer(request.user)
@@ -127,6 +135,7 @@ def user_profile(request):
 )
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
+@throttle_classes([MediumSecurityThrottle])
 def logout_view(request):
     """Logout user by clearing refresh token cookie"""
     response = Response({'message': 'Successfully logged out'}, status=status.HTTP_200_OK)

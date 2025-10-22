@@ -105,6 +105,25 @@ REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.IsAuthenticated",
     ],
+    "DEFAULT_THROTTLE_CLASSES": [
+        "rest_framework.throttling.AnonRateThrottle",
+        "rest_framework.throttling.UserRateThrottle",
+    ],
+    "DEFAULT_THROTTLE_RATES": {
+        "anon": "100/min",          # Anonymous users: 100 requests per min
+        "user": "1000/min",         # Authenticated users: 1000 requests per min
+        "login": "10/min",          # Login attempts: 10 per min per IP
+        "register": "5/min",        # Registration: 5 per min per IP
+        "password_reset": "3/min",  # Password reset: 3 per min per IP
+        "task_create": "100/min",   # Task creation: 100 per min per user
+        "task_update": "200/min",   # Task updates: 200 per min per user
+        "burst": "60/min",           # Burst protection: 60 per minute
+        "sustained": "1000/day",     # Daily limit: 1000 per day per user
+        "anon_strict": "20/min",    # Strict limits for anonymous users
+        "low_security": "2000/min", # Low-risk endpoints
+        "medium_security": "500/min", # Medium-risk endpoints  
+        "high_security": "50/min",  # High-risk endpoints
+    },
     # "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     "DEFAULT_FILTER_BACKENDS": [
         "django_filters.rest_framework.DjangoFilterBackend",

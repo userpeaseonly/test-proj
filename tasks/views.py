@@ -1,11 +1,15 @@
 from rest_framework import generics, status, filters
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import api_view, permission_classes, throttle_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from django.db.models import Count, Q
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 from drf_spectacular.types import OpenApiTypes
+from application.throttles import (
+    TaskCreateRateThrottle, TaskUpdateRateThrottle, BurstRateThrottle,
+    LowSecurityThrottle, MediumSecurityThrottle
+)
 from .models import Task
 from .serializers import (
     TaskSerializer, 
@@ -17,6 +21,7 @@ from .serializers import (
 
 class TaskListCreateView(generics.ListCreateAPIView):
     permission_classes = [IsAuthenticated]
+    throttle_classes = [TaskCreateRateThrottle, BurstRateThrottle]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['completed']
     search_fields = ['title', 'description']
@@ -60,6 +65,7 @@ class TaskListCreateView(generics.ListCreateAPIView):
 
 class TaskRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [IsAuthenticated]
+    throttle_classes = [TaskUpdateRateThrottle, BurstRateThrottle]
 
     def get_queryset(self):
         # Users can only access their own tasks
@@ -121,6 +127,7 @@ class TaskRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
 )
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
+@throttle_classes([TaskUpdateRateThrottle, BurstRateThrottle])
 def mark_task_completed(request, pk):
     """Mark a task as completed"""
     try:
@@ -140,6 +147,7 @@ def mark_task_completed(request, pk):
 )
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
+@throttle_classes([TaskUpdateRateThrottle, BurstRateThrottle])
 def mark_task_pending(request, pk):
     """Mark a task as pending"""
     try:
@@ -159,6 +167,7 @@ def mark_task_pending(request, pk):
 )
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
+@throttle_classes([TaskUpdateRateThrottle, BurstRateThrottle])
 def toggle_task_completion(request, pk):
     """Toggle task completion status"""
     try:
@@ -177,6 +186,7 @@ def toggle_task_completion(request, pk):
 )
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
+@throttle_classes([LowSecurityThrottle])
 def task_stats(request):
     """Get user's task statistics"""
     user_tasks = Task.objects.filter(user=request.user)
